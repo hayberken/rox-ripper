@@ -1,11 +1,19 @@
 <?xml version="1.0"?>
 <AppInfo>
   <Summary xml:lang="en">MP3/OGG CD Ripper</Summary>
-  <About xml:lang="en">
+  <Summary xml:lang="it">MP3/OGG CD Ripper</Summary>
+    <About xml:lang="en">
     <Purpose>MP3/OGG CD Ripper</Purpose>
     <Author>Ken Hayber</Author>
-    <Version>003 (09-Apr-2004)</Version>
+    <Version>004 (15-May-2004)</Version>
     <License>GNU General Public License</License>
     <Homepage>http://khayber.dyndns.org/rox/ripper</Homepage>
   </About>
+    <About xml:lang="it">
+    <Purpose label="Scopo"/>
+    <Version label="Versione"/>
+    <Author label="Autore"/>
+    <License label="Licenza"/>
+    <Homepage label="Sito web"/>
+   </About>
 </AppInfo>

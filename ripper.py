@@ -25,7 +25,7 @@ from random import Random
 from threading import *
 
 import rox
-from rox import g, i18n, app_options
+from rox import g, i18n, app_options, Menu
 from rox.options import Option
 
 import PyCDDB, cd_logic, CDROM, genres
@@ -140,9 +140,6 @@ class Ripper(rox.Window):
 		swin.add(view)
 		view.set_rules_hint(True)
 
-#		self.view.add_events(g.gdk.BUTTON_PRESS_MASK)
-#		self.view.connect('button-press-event', self.button_press)
-
 		cell = g.CellRendererToggle()
 		cell.connect('toggled', self.toggle_check)
 		column = g.TreeViewColumn('', cell, active=COL_ENABLE)
@@ -221,6 +218,24 @@ class Ripper(rox.Window):
 		self.vbox.pack_start(self.scroll_window, True, True, 0)
 		self.vbox.show_all()
 
+		# Menu
+		self.add_events(g.gdk.BUTTON_PRESS_MASK)
+		self.connect('button-press-event', self.button_press)
+		view.add_events(g.gdk.BUTTON_PRESS_MASK)
+		view.connect('button-press-event', self.button_press)
+
+		Menu.set_save_name(APP_NAME)
+		self.menu = Menu.Menu('main', [
+			Menu.Action(_('Rip & Encode'), 'rip_n_encode', '', g.STOCK_EXECUTE),
+			Menu.Action(_('Reload CD'), 'do_get_tracks', '', g.STOCK_REFRESH),
+			Menu.Action(_('Stop'), 'stop', '', g.STOCK_STOP),
+			Menu.Separator(),
+			Menu.Action(_('Settings'), 'show_options', '', g.STOCK_PREFERENCES),
+			Menu.Action(_("Quit"), 'close', '', g.STOCK_CLOSE),
+			])
+		self.menu.attach(self,self)
+
+		# Defaults and Misc
 		self.cddb_thd = None
 		self.ripper_thd = None
 		self.encoder_thd = None
@@ -740,6 +755,13 @@ class Ripper(rox.Window):
 		#model, iter = self.view.get_selection().get_selected()
 		#if iter:
 		#	track = model.get_value(iter, COL_TRACK)
+
+	def button_press(self, text, event):
+		'''Popup menu handler'''
+		if event.button != 3:
+			return 0
+		self.menu.popup(self, event)
+		return 1
 
 	def show_options(self, button=None):
 		'''Show Options dialog'''
