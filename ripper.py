@@ -20,12 +20,12 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-import os, sys, signal, re, string, socket, time, popen2, threading, Queue
+import gtk, os, sys, signal, re, string, socket, time, popen2, threading, Queue
 from random import Random
 from threading import *
 
 import rox
-from rox import g, i18n, app_options, Menu
+from rox import i18n, app_options, Menu, filer
 from rox.options import Option
 
 import PyCDDB, cd_logic, CDROM, genres
@@ -47,7 +47,7 @@ APP_PATH = os.path.split(os.path.abspath(sys.argv[0]))[0]
 rox.setup_app_options(APP_NAME)
 
 #assume that everyone puts their music in ~/Music
-LIBRARY = Option('library', os.path.expanduser('~')+'/MyMusic')
+LIBRARY = Option('library', '~/Music')
 
 #RIPPER options
 RIPPER = Option('ripper', 'cdda2wav')
@@ -118,7 +118,7 @@ class Ripper(rox.Window):
 
 		self.set_title(APP_NAME)
 		self.set_default_size(450, 500)
-		self.set_position(g.WIN_POS_MOUSE)
+		self.set_position(gtk.WIN_POS_MOUSE)
 
 		#capture wm delete event
 		self.connect("delete_event", self.delete_event)
@@ -129,39 +129,39 @@ class Ripper(rox.Window):
 
 		#song list
 		#######################################
-		swin = g.ScrolledWindow()
+		swin = gtk.ScrolledWindow()
 		self.scroll_window = swin
-		swin.set_policy(g.POLICY_AUTOMATIC, g.POLICY_AUTOMATIC)
-		swin.set_shadow_type(g.SHADOW_IN)
+		swin.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+		swin.set_shadow_type(gtk.SHADOW_IN)
 
-		self.store = g.ListStore(int, str, str, str)
-		view = g.TreeView(self.store)
+		self.store = gtk.ListStore(int, str, str, str)
+		view = gtk.TreeView(self.store)
 		self.view = view
 		swin.add(view)
 		view.set_rules_hint(True)
 
-		cell = g.CellRendererToggle()
+		cell = gtk.CellRendererToggle()
 		cell.connect('toggled', self.toggle_check)
-		column = g.TreeViewColumn('', cell, active=COL_ENABLE)
+		column = gtk.TreeViewColumn('', cell, active=COL_ENABLE)
 		view.append_column(column)
 		column.set_resizable(False)
 		column.set_reorderable(False)
 
-		cell = g.CellRendererText()
-		column = g.TreeViewColumn(_('Track'), cell, text = COL_TRACK)
+		cell = gtk.CellRendererText()
+		column = gtk.TreeViewColumn(_('Track'), cell, text = COL_TRACK)
 		view.append_column(column)
 		column.set_resizable(True)
-		#column.set_sizing(g.TREE_VIEW_COLUMN_AUTOSIZE)
+		#column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
 		column.set_reorderable(False)
 
-		cell = g.CellRendererText()
-		column = g.TreeViewColumn(_('Time'), cell, text = COL_TIME)
+		cell = gtk.CellRendererText()
+		column = gtk.TreeViewColumn(_('Time'), cell, text = COL_TIME)
 		view.append_column(column)
 		column.set_resizable(True)
 		column.set_reorderable(False)
 
-		cell = g.CellRendererText()
-		column = g.TreeViewColumn(_('Status'), cell, text = COL_STATUS)
+		cell = gtk.CellRendererText()
+		column = gtk.TreeViewColumn(_('Status'), cell, text = COL_STATUS)
 		view.append_column(column)
 		column.set_resizable(True)
 		column.set_reorderable(False)
@@ -171,47 +171,53 @@ class Ripper(rox.Window):
 		self.handler = self.selection.connect('changed', self.set_selection)
 
 
-		self.toolbar = g.Toolbar()
-		self.toolbar.set_style(g.TOOLBAR_ICONS)
-		self.toolbar.insert_stock(g.STOCK_PREFERENCES,
+		self.toolbar = gtk.Toolbar()
+		self.toolbar.set_style(gtk.TOOLBAR_ICONS)
+		self.toolbar.insert_stock(gtk.STOCK_PREFERENCES,
 							_('Settings'), None, self.show_options, None, 0)
-		self.stop_btn = self.toolbar.insert_stock(g.STOCK_STOP,
+		self.stop_btn = self.toolbar.insert_stock(gtk.STOCK_STOP,
 							_('Stop'), None, self.stop, None, 0)
-		self.rip_btn = self.toolbar.insert_stock(g.STOCK_EXECUTE,
+		self.rip_btn = self.toolbar.insert_stock(gtk.STOCK_EXECUTE,
 							_('Rip & Encode'), None, self.rip_n_encode, None, 0)
-		self.refresh_btn = self.toolbar.insert_stock(g.STOCK_REFRESH,
+		self.refresh_btn = self.toolbar.insert_stock(gtk.STOCK_REFRESH,
 							_('Reload CD'), None, self.do_get_tracks, None, 0)
 
+		self.toolbar.insert_stock(gtk.STOCK_GO_UP,
+							_('Show destination dir'), None, self.show_dir, None, 0)
 
-		self.table = g.Table(5, 2, False)
+		self.toolbar.insert_stock(gtk.STOCK_CLOSE,
+							_('Close'), None, self.close, None, 0)
+
+
+		self.table = gtk.Table(5, 2, False)
 		x_pad = 2
 		y_pad = 1
 
-		self.artist_entry = g.Entry(max=255)
+		self.artist_entry = gtk.Entry(max=255)
 		self.artist_entry.connect('changed', self.stuff_changed)
-		self.table.attach(g.Label(str=_('Artist')), 0, 1, 2, 3, 0, 0, 4, y_pad)
-		self.table.attach(self.artist_entry, 1, 2, 2, 3, g.EXPAND|g.FILL, 0, x_pad, y_pad)
+		self.table.attach(gtk.Label(str=_('Artist')), 0, 1, 2, 3, 0, 0, 4, y_pad)
+		self.table.attach(self.artist_entry, 1, 2, 2, 3, gtk.EXPAND|gtk.FILL, 0, x_pad, y_pad)
 
-		self.album_entry = g.Entry(max=255)
+		self.album_entry = gtk.Entry(max=255)
 		self.album_entry.connect('changed', self.stuff_changed)
-		self.table.attach(g.Label(str=_('Album')),	0, 1, 3, 4, 0, 0, 4, y_pad)
-		self.table.attach(self.album_entry,	1, 2, 3, 4, g.EXPAND|g.FILL, 0, x_pad, y_pad)
+		self.table.attach(gtk.Label(str=_('Album')),	0, 1, 3, 4, 0, 0, 4, y_pad)
+		self.table.attach(self.album_entry,	1, 2, 3, 4, gtk.EXPAND|gtk.FILL, 0, x_pad, y_pad)
 
 		genres.genre_list.sort()
-		self.genre_combo = g.Combo()
+		self.genre_combo = gtk.Combo()
 		self.genre_combo.set_popdown_strings(genres.genre_list)
 		self.genre_combo.entry.connect('changed', self.stuff_changed)
-		self.table.attach(g.Label(str=_('Genre')),	0, 1, 4, 5, 0, 0, 4, y_pad)
-		self.table.attach(self.genre_combo,	1, 2, 4, 5, g.EXPAND|g.FILL, 0, x_pad, y_pad)
+		self.table.attach(gtk.Label(str=_('Genre')),	0, 1, 4, 5, 0, 0, 4, y_pad)
+		self.table.attach(self.genre_combo,	1, 2, 4, 5, gtk.EXPAND|gtk.FILL, 0, x_pad, y_pad)
 
-		self.year_entry = g.Entry(max=4)
+		self.year_entry = gtk.Entry(max=4)
 		self.year_entry.connect('changed', self.stuff_changed)
-		self.table.attach(g.Label(str=_('Year')),	0, 1, 5, 6, 0, 0, 4, y_pad)
-		self.table.attach(self.year_entry,	1, 2, 5, 6, g.EXPAND|g.FILL, 0, x_pad, y_pad)
+		self.table.attach(gtk.Label(str=_('Year')),	0, 1, 5, 6, 0, 0, 4, y_pad)
+		self.table.attach(self.year_entry,	1, 2, 5, 6, gtk.EXPAND|gtk.FILL, 0, x_pad, y_pad)
 
 
 		# Create layout, pack and show widgets
-		self.vbox = g.VBox()
+		self.vbox = gtk.VBox()
 		self.add(self.vbox)
 		self.vbox.pack_start(self.toolbar, False, True, 0)
 		self.vbox.pack_start(self.table, False, True, 0)
@@ -219,19 +225,19 @@ class Ripper(rox.Window):
 		self.vbox.show_all()
 
 		# Menu
-		self.add_events(g.gdk.BUTTON_PRESS_MASK)
+		self.add_events(gtk.gdk.BUTTON_PRESS_MASK)
 		self.connect('button-press-event', self.button_press)
-		view.add_events(g.gdk.BUTTON_PRESS_MASK)
+		view.add_events(gtk.gdk.BUTTON_PRESS_MASK)
 		view.connect('button-press-event', self.button_press)
 
 		Menu.set_save_name(APP_NAME)
 		self.menu = Menu.Menu('main', [
-			Menu.Action(_('Rip & Encode'), 'rip_n_encode', '', g.STOCK_EXECUTE),
-			Menu.Action(_('Reload CD'), 'do_get_tracks', '', g.STOCK_REFRESH),
-			Menu.Action(_('Stop'), 'stop', '', g.STOCK_STOP),
+			Menu.Action(_('Rip & Encode'), 'rip_n_encode', '', gtk.STOCK_EXECUTE),
+			Menu.Action(_('Reload CD'), 'do_get_tracks', '', gtk.STOCK_REFRESH),
+			Menu.Action(_('Stop'), 'stop', '', gtk.STOCK_STOP),
 			Menu.Separator(),
-			Menu.Action(_('Settings'), 'show_options', '', g.STOCK_PREFERENCES),
-			Menu.Action(_("Quit"), 'close', '', g.STOCK_CLOSE),
+			Menu.Action(_('Settings'), 'show_options', '', gtk.STOCK_PREFERENCES),
+			Menu.Action(_("Quit"), 'close', '', gtk.STOCK_CLOSE),
 			])
 		self.menu.attach(self,self)
 
@@ -253,7 +259,7 @@ class Ripper(rox.Window):
 			self.no_disc()
 		else:
 			self.do_get_tracks()
-		g.timeout_add(1000, self.update_gui)
+		gtk.timeout_add(1000, self.update_gui)
 
 
 	def update_gui(self):
@@ -309,6 +315,10 @@ class Ripper(rox.Window):
 		'''Stop current rip/encode process'''
 		self.stop_request = True
 
+	def show_dir(self, *dummy):
+		''' Pops up a filer window. '''
+		temp = os.path.join(os.path.expanduser(LIBRARY.value), self.artist, self.album)
+		filer.show_file(temp)
 
 	def do_get_tracks(self, button=None):
 		'''Get the track info (cddb and cd) in a thread'''
@@ -320,21 +330,21 @@ class Ripper(rox.Window):
 	def no_disc(self):
 		'''Clear all info and display <no disc>'''
 		#print "no disc in tray?"
-		g.threads_enter()
+		gtk.threads_enter()
 		self.store.clear()
 		self.artist_entry.set_text(_('<no disc>'))
 		self.album_entry.set_text('')
 		self.genre_combo.entry.set_text('')
 		self.year_entry.set_text('')
 		self.view.columns_autosize()
-		g.threads_leave()
+		gtk.threads_leave()
 
 
 	def get_tracks(self):
 		'''Get the track info (cddb and cd)'''
 		self.is_cddbing = True
 		stuff = self.get_cddb()
-		g.threads_enter()
+		gtk.threads_enter()
 		(count, artist, album, genre, year, tracklist) = stuff
 		#print count, artist, album, genre, year, tracklist
 
@@ -359,21 +369,21 @@ class Ripper(rox.Window):
 			self.store.set(iter, COL_ENABLE, True)
 
 		self.view.columns_autosize()
-		g.threads_leave()
+		gtk.threads_leave()
 		self.is_cddbing = False
 
 
 	def get_cddb(self):
 		'''Query cddb for track and cd info'''
-		g.threads_enter()
-		dlg = g.MessageDialog(buttons=g.BUTTONS_CANCEL, message_format="Getting Track Info.")
-		dlg.set_position(g.WIN_POS_NONE)
+		gtk.threads_enter()
+		dlg = gtk.MessageDialog(buttons=gtk.BUTTONS_CANCEL, message_format="Getting Track Info.")
+		dlg.set_position(gtk.WIN_POS_NONE)
 		(a, b) = dlg.get_size()
 		(x, y) = self.get_position()
 		(dx, dy) = self.get_size()
 		dlg.move(x+dx/2-a/2, y+dy/2-b/2)
 		dlg.show()
-		g.threads_leave()
+		gtk.threads_leave()
 
 		count = artist = genre = album = year = ''
 		tracklist = []
@@ -404,9 +414,9 @@ class Ripper(rox.Window):
 				query_info = db.query(cddb_id_string)
 				#print query_info
 
-				g.threads_enter()
+				gtk.threads_enter()
 				dlg.set_title(_('Got Disc Info'))
-				g.threads_leave()
+				gtk.threads_leave()
 
 				#make sure we didn't get an error, then query CDDB
 				if len(query_info) > 0:
@@ -414,9 +424,9 @@ class Ripper(rox.Window):
 					index = rndm.randrange(0, len(query_info))
 					read_info = db.read(query_info[index])
 					#print read_info
-					g.threads_enter()
+					gtk.threads_enter()
 					dlg.set_title(_('Got Track Info'))
-					g.threads_leave()
+					gtk.threads_leave()
 
 					try:
 						(artist, album) = query_info[index]['title'].split('/')
@@ -452,9 +462,9 @@ class Ripper(rox.Window):
 		except:
 			pass
 
-		g.threads_enter()
+		gtk.threads_enter()
 		dlg.destroy()
-		g.threads_leave()
+		gtk.threads_leave()
 		return count, artist, album, genre, year, tracklist
 
 
@@ -463,7 +473,7 @@ class Ripper(rox.Window):
 		cdda2wav_cmd = RIPPER.value
 		cdda2wav_dev = RIPPER_DEV.value
 		cdda2wav_lun = RIPPER_LUN.value
-		cdda2wav_args = '-D%s -A%s -t %d "%s"' % (
+		cdda2wav_args = '-g -D%s -A%s -t %d "%s"' % (
 						cdda2wav_lun, cdda2wav_dev, tracknum+1, strip_illegal(track))
 		cdda2wav_opts =  RIPPER_OPTS.value
 		#print cdda2wav_opts, cdda2wav_args
@@ -474,9 +484,9 @@ class Ripper(rox.Window):
 		while True:
 			line = myreadline(outfile)
 			if line:
-				x = re.match('([\s0-9]+)%', line)
+				x = re.match("(.+[\s]+)([0-9]+)%", line)
 				if x:
-					percent = int(x.group(1))
+					percent = int(x.group(2))
 					self.status_update(tracknum, 'rip', percent)
 			else:
 				break
@@ -598,12 +608,14 @@ class Ripper(rox.Window):
 
 	def rip_n_encode(self, button=None):
 		'''Process all selected tracks (rip and encode)'''
-		try: os.chdir(os.path.expanduser('~'))
-		except: pass
-		try: os.mkdir(LIBRARY.value)
-		except: pass
-		try: os.chdir(LIBRARY.value)
-		except: pass
+		try:
+			os.chdir(os.path.expanduser(LIBRARY.value))
+		except:
+			try:
+				os.mkdir(os.path.expanduser(LIBRARY.value))
+				os.chdir(os.path.expanduser(LIBRARY.value))
+			except:
+				rox.alert("Failed to find or create Library dir")
 
 		if self.count and self.artist and self.album:
 			try: os.mkdir(self.artist)
@@ -682,7 +694,7 @@ class Ripper(rox.Window):
 
 	def status_update(self, row, state, percent):
 		'''Callback from rip/encode threads to update display'''
-		g.threads_enter()
+		gtk.threads_enter()
 
 		iter = self.store.get_iter((row,))
 		if not iter: return
@@ -705,7 +717,7 @@ class Ripper(rox.Window):
 		if state == 'enc_error':
 			self.store.set_value(iter, COL_STATUS, _('Encoding')+': '+_('error'))
 
-		g.threads_leave()
+		gtk.threads_leave()
 
 
 	def activate(self, view, path, column):
@@ -713,8 +725,8 @@ class Ripper(rox.Window):
 		model, iter = self.view.get_selection().get_selected()
 		if iter:
 			track = model.get_value(iter, COL_TRACK)
-			dlg = g.Dialog(APP_NAME)
-			dlg.set_position(g.WIN_POS_NONE)
+			dlg = gtk.Dialog(APP_NAME)
+			dlg.set_position(gtk.WIN_POS_NONE)
 			dlg.set_default_size(350, 100)
 			(a, b) = dlg.get_size()
 			(x, y) = self.get_position()
@@ -722,19 +734,19 @@ class Ripper(rox.Window):
 			dlg.move(x+dx/2-a/2, y+dy/2-b/2)
 			dlg.show()
 
-			entry = g.Entry()
+			entry = gtk.Entry()
 			entry.set_text(track)
-			dlg.set_position(g.WIN_POS_MOUSE)
+			dlg.set_position(gtk.WIN_POS_MOUSE)
 			entry.show()
 			entry.set_activates_default(True)
 			dlg.vbox.pack_start(entry)
 
-			dlg.add_button(g.STOCK_OK, g.RESPONSE_OK)
-			dlg.add_button(g.STOCK_CANCEL, g.RESPONSE_CANCEL)
-			dlg.set_default_response(g.RESPONSE_OK)
+			dlg.add_button(gtk.STOCK_OK, gtk.RESPONSE_OK)
+			dlg.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+			dlg.set_default_response(gtk.RESPONSE_OK)
 			response = dlg.run()
 
-			if response == g.RESPONSE_OK:
+			if response == gtk.RESPONSE_OK:
 				track = entry.get_text()
 				#print track
 				model.set_value(iter, COL_TRACK, track)

@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 import findrox; findrox.version(1, 9, 8)
-import rox
-from rox import g
+import rox, gtk
 
 import ripper
 
 try:
-	g.threads_init()
+	gtk.threads_init()
 except:
 	rox.croak("Ripper needs threads support and you don't have it")
 
