@@ -1,17 +1,30 @@
 #!/usr/bin/env python
-import findrox; findrox.version(1, 9, 8)
-import rox, gtk
-
-import ripper
-
 try:
-	gtk.threads_init()
-except:
-	rox.croak("Ripper needs threads support and you don't have it")
+	import findrox; findrox.version(1, 9, 13)
+	import rox, gtk, os
 
-try:
-	theapp = ripper.Ripper()
-	theapp.show()
+	__builtins__._ = rox.i18n.translation(os.path.join(rox.app_dir, 'Messages'))
+
+	from optparse import OptionParser
+
+	parser = OptionParser()
+	parser.add_option("--options",
+		action="store_true", dest="options", default=False,
+		help="display options dialog without running application")
+
+	(options, args) = parser.parse_args()
+
+	import ripper
+	if options.options:
+		rox.edit_options()
+	else:
+		try:
+			gtk.threads_init()
+		except:
+			rox.croak("Ripper needs threads support and you don't have it")
+
+		theapp = ripper.Ripper()
+		theapp.show()
 
 	rox.mainloop()
 except:

@@ -1,12 +1,12 @@
 """
 	CDLow - Low level CDROM interface
-	Written to replace CDAudio, CDDB and PyGAME.CD and 
+	Written to replace CDAudio, CDDB and PyGAME.CD and
 		add functionality (skipping)
 	Originally from the Gryphon CD player (http://gryphon.sourceforge.net/)
-	
+
 	Copyright 2001 (c) Christian Storgaard.
-   	Changes made by Ron Kuslak <rds@rdsarts.com>, 2003-2004
-	
+	Changes made by Ron Kuslak <rds@rdsarts.com>, 2003-2004
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
@@ -66,7 +66,7 @@ def cd_open():
 			cd.status = NODISC
 			trayopen = 1
 			return 1
-		
+
 def cd_close():
 	if cd.cd < 1:
 		cd.open = 0
@@ -170,7 +170,7 @@ def eject():
 		ioctl(cd.cd, CDROMEJECT_SW, 0)
 		ioctl(cd.cd, CDROMEJECT)
 #	cd_close()
-	
+
 def close():
 #	cd_open()
 	try:
@@ -211,7 +211,7 @@ def get_volume():
 #	cd_open()
 	try:
 		return struct.unpack("BBBB",ioctl(cd.cd, CDROMVOLREAD, struct.pack("BBBB",0,0,0,0)))
-		
+
 	except:
 		return (0,0,0,0)
 #	cd_close()
@@ -221,7 +221,7 @@ def set_volume(frontleft,frontright=None,backleft=0,backright=0):
 	if frontright == None: frontright = frontleft
 	try:
 		return struct.unpack("BBBB",ioctl(cd.cd, CDROMVOLCTRL, struct.pack("BBBB",frontleft,frontright,backleft,backright)))
-		
+
 	except:
 		return 1
 #	cd_close()
@@ -308,7 +308,7 @@ def get_track_length(first,last=None):
 	if last==None: last=first+1
 	off1min, off1sec, off1frm, off1, data1 = get_track_time(first)
 	off2min, off2sec, off2frm, off2, data2 = get_track_time(last)
-	
+
 	lenmin,lensec,lenfrm=frm2msf(off2-off1)
 
 	return off1min,off1sec,off1frm,lenmin,lensec,lenfrm,off1,data1

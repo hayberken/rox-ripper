@@ -1,0 +1,197 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"PO-Revision-Date: Fri May 14 19:03:45 2004\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.1\n"
+
+
+#: ripper.py:197
+msgid "Album"
+msgstr ""
+
+#: ripper.py:234
+msgid "Quit"
+msgstr ""
+
+#: ripper.py:694 ripper.py:700
+msgid "done"
+msgstr ""
+
+#: tips:21
+msgid "mp3"
+msgstr ""
+
+#: tips:4
+msgid "CDDB"
+msgstr ""
+
+#: tips:9
+msgid ""
+"The application used for ripping from CD.\n"
+"If this is not in your PATH you need to give the full path to the executable.\n"
+"To run at lower priority run with 'nice'. (e.g. 'nice cdda2wav')"
+msgstr ""
+
+#: tips:12
+msgid "LUN"
+msgstr ""
+
+#: ripper.py:164
+msgid "Status"
+msgstr ""
+
+#: tips:30 tips:31 tips:32
+msgid "Options for the encoder.  For example: ???."
+msgstr ""
+
+#: tips:16
+msgid "Eject after Rip"
+msgstr ""
+
+#: ripper.py:151 ripper.py:400
+msgid "Track"
+msgstr ""
+
+#: ripper.py:192
+msgid "Artist"
+msgstr ""
+
+#: ripper.py:179 ripper.py:231
+msgid "Stop"
+msgstr ""
+
+#: ripper.py:325
+msgid "<no disc>"
+msgstr ""
+
+#: tips:17 tips:18
+msgid "Eject CD after ripping is complete (Encoding may still be running)."
+msgstr ""
+
+#: tips:7 tips:8
+msgid "Ripper"
+msgstr ""
+
+#: tips:26
+msgid "Options for the encoder.  For example: vbr, id3 tags, min bitrate."
+msgstr ""
+
+#: ripper.py:204
+msgid "Genre"
+msgstr ""
+
+#: ripper.py:418
+msgid "Got Track Info"
+msgstr ""
+
+#: tips:23
+msgid "MP3 Encoder"
+msgstr ""
+
+#: tips:14 tips:25 tips:29
+msgid "Options"
+msgstr ""
+
+#: ripper.py:177 ripper.py:233
+msgid "Settings"
+msgstr ""
+
+#: ripper.py:183 ripper.py:230
+msgid "Reload CD"
+msgstr ""
+
+#: ripper.py:703 ripper.py:706
+msgid "error"
+msgstr ""
+
+#: tips:24
+msgid ""
+"The application used for encoding to MP3.\n"
+"If this is not in your PATH you need to give the full path to the executable.\n"
+"To run at lower priority run with 'nice'. (e.g. 'nice lame')"
+msgstr ""
+
+#: tips:10
+msgid "Device"
+msgstr ""
+
+#: tips:3
+msgid "The (optional) default location of your music."
+msgstr ""
+
+#: tips:28
+msgid ""
+"The application used for encoding to OGG.\n"
+"If this is not in your PATH you need to give the full path to the executable.\n"
+"To run at lower priority run with 'nice'. (e.g. 'nice oggenc')"
+msgstr ""
+
+#: ripper.py:158
+msgid "Time"
+msgstr ""
+
+#: tips:5 tips:6
+msgid "The full url to reach freedb or equivalent.  By default this is 'http://freedb.freedb.org/~cddb/cddb.cgi', but there are mirrors. Leave blank to disable CDDB queries."
+msgstr ""
+
+#: tips:11
+msgid "Device name of cdrom.  For example: /dev/cdrom."
+msgstr ""
+
+#: tips:15
+msgid "Options for the encoder.  For example: quality, speed, etc."
+msgstr ""
+
+#: tips:13
+msgid "SCSI-style device name.  For example: 0,0,1 or ATAPI:0,1,0."
+msgstr ""
+
+#: tips:27
+msgid "OGG Encoder"
+msgstr ""
+
+#: ripper.py:698 ripper.py:700 ripper.py:706
+msgid "Encoding"
+msgstr ""
+
+#: tips:22
+msgid "ogg"
+msgstr ""
+
+#: tips:1
+msgid "Locations"
+msgstr ""
+
+#: ripper.py:181 ripper.py:229
+msgid "Rip & Encode"
+msgstr ""
+
+#: tips:19 tips:20
+msgid "Encoder"
+msgstr ""
+
+#: ripper.py:209
+msgid "Year"
+msgstr ""
+
+#: tips:2
+msgid "Music"
+msgstr ""
+
+#: ripper.py:408
+msgid "Got Disc Info"
+msgstr ""
+
+#: ripper.py:692 ripper.py:694 ripper.py:703
+msgid "Ripping"
+msgstr ""
+

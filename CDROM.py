@@ -2,8 +2,8 @@
 	CDROM.py
 		Constants for CDLow.py
 	Copyright 2003 Christian Storgaard
-   	Changes made by Ron Kuslak <rds@rdsarts.com>, 12/15/2003,
-   	and are limited to the formating of this message.
+	Changes made by Ron Kuslak <rds@rdsarts.com>, 12/15/2003,
+	and are limited to the formating of this message.
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by

@@ -25,7 +25,7 @@ from random import Random
 from threading import *
 
 import rox
-from rox import i18n, app_options, Menu, filer
+from rox import i18n, app_options, Menu, filer, InfoWin
 from rox.options import Option
 
 import PyCDDB, cd_logic, CDROM, genres
@@ -40,11 +40,14 @@ _ = rox.i18n.translation(os.path.join(rox.app_dir, 'Messages'))
 
 #Who am I and how did I get here?
 APP_NAME = 'Ripper'  #I could call it Mr. Giles, but that would be gay.
-APP_PATH = os.path.split(os.path.abspath(sys.argv[0]))[0]
+APP_PATH = rox.app_dir
 
 
 #Options.xml processing
-rox.setup_app_options(APP_NAME)
+from rox import choices
+choices.migrate(APP_NAME, 'hayber.us')
+rox.setup_app_options(APP_NAME, site='hayber.us')
+Menu.set_save_name(APP_NAME, site='hayber.us')
 
 #assume that everyone puts their music in ~/Music
 LIBRARY = Option('library', '~/Music')
@@ -230,13 +233,13 @@ class Ripper(rox.Window):
 		view.add_events(gtk.gdk.BUTTON_PRESS_MASK)
 		view.connect('button-press-event', self.button_press)
 
-		Menu.set_save_name(APP_NAME)
 		self.menu = Menu.Menu('main', [
 			Menu.Action(_('Rip & Encode'), 'rip_n_encode', '', gtk.STOCK_EXECUTE),
 			Menu.Action(_('Reload CD'), 'do_get_tracks', '', gtk.STOCK_REFRESH),
 			Menu.Action(_('Stop'), 'stop', '', gtk.STOCK_STOP),
 			Menu.Separator(),
-			Menu.Action(_('Settings'), 'show_options', '', gtk.STOCK_PREFERENCES),
+			Menu.Action(_('Options'), 'show_options', '', gtk.STOCK_PREFERENCES),
+			Menu.Action(_('Info'),	'get_info', '', gtk.STOCK_DIALOG_INFO),
 			Menu.Action(_("Quit"), 'close', '', gtk.STOCK_CLOSE),
 			])
 		self.menu.attach(self,self)
@@ -377,11 +380,11 @@ class Ripper(rox.Window):
 		'''Query cddb for track and cd info'''
 		gtk.threads_enter()
 		dlg = gtk.MessageDialog(buttons=gtk.BUTTONS_CANCEL, message_format="Getting Track Info.")
-		dlg.set_position(gtk.WIN_POS_NONE)
-		(a, b) = dlg.get_size()
-		(x, y) = self.get_position()
-		(dx, dy) = self.get_size()
-		dlg.move(x+dx/2-a/2, y+dy/2-b/2)
+#		dlg.set_position(gtk.WIN_POS_NONE)
+#		(a, b) = dlg.get_size()
+#		(x, y) = self.get_position()
+#		(dx, dy) = self.get_size()
+#		dlg.move(x+dx/2-a/2, y+dy/2-b/2)
 		dlg.show()
 		gtk.threads_leave()
 
@@ -389,7 +392,7 @@ class Ripper(rox.Window):
 		tracklist = []
 		tracktime = []
 
-		#Note: all the nested try statements are to ensure that as much
+		#Note: all the nested try|except|pass statements are to ensure that as much
 		#info is processed as possible.  One exception should not stop
 		#the whole thing and return nothing.
 
@@ -726,17 +729,17 @@ class Ripper(rox.Window):
 		if iter:
 			track = model.get_value(iter, COL_TRACK)
 			dlg = gtk.Dialog(APP_NAME)
-			dlg.set_position(gtk.WIN_POS_NONE)
+#			dlg.set_position(gtk.WIN_POS_NONE)
 			dlg.set_default_size(350, 100)
-			(a, b) = dlg.get_size()
-			(x, y) = self.get_position()
-			(dx, dy) = self.get_size()
-			dlg.move(x+dx/2-a/2, y+dy/2-b/2)
+#			(a, b) = dlg.get_size()
+#			(x, y) = self.get_position()
+#			(dx, dy) = self.get_size()
+#			dlg.move(x+dx/2-a/2, y+dy/2-b/2)
 			dlg.show()
 
 			entry = gtk.Entry()
 			entry.set_text(track)
-			dlg.set_position(gtk.WIN_POS_MOUSE)
+#			dlg.set_position(gtk.WIN_POS_MOUSE)
 			entry.show()
 			entry.set_activates_default(True)
 			dlg.vbox.pack_start(entry)
@@ -782,6 +785,9 @@ class Ripper(rox.Window):
 	def get_options(self):
 		'''Get changed Options'''
 		pass
+
+	def get_info(self):
+		InfoWin.infowin(APP_NAME)
 
 	def delete_event(self, ev, e1):
 		'''Bye-bye'''
