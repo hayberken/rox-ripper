@@ -30,6 +30,12 @@ from rox.options import Option
 
 import PyCDDB, cd_logic, CDROM, genres
 
+try:
+	import xattr
+	HAVE_XATTR = True
+except:
+	HAVE_XATTR = False
+
 _ = rox.i18n.translation(os.path.join(rox.app_dir, 'Messages'))
 
 #Who am I and how did I get here?
@@ -43,6 +49,7 @@ rox.setup_app_options(APP_NAME)
 #assume that everyone puts their music in ~/Music
 LIBRARY = Option('library', os.path.expanduser('~')+'/MyMusic')
 
+#RIPPER options
 RIPPER = Option('ripper', 'cdda2wav')
 RIPPER_DEV = Option('ripper_dev', '/dev/cdrom')
 RIPPER_LUN = Option('ripper_lun', 'ATAPI:0,1,0')
@@ -50,15 +57,17 @@ RIPPER_OPTS = Option('ripper_opts', '-x -H')
 
 EJECT_AFTER_RIP = Option('eject_after_rip', '0')
 
-ENCODER = Option('encoder', 'lame')
-ENCODER_OPTS = Option('encoder_opts', '--vbr-new -b160 --nohist --add-id3v2')
+#ENCODER options
+ENCODER = Option('encoder', 'MP3')
 
+MP3_ENCODER = Option('mp3_encoder', 'lame')
+MP3_ENCODER_OPTS = Option('mp3_encoder_opts', '--vbr-new -b160 --nohist --add-id3v2')
+
+OGG_ENCODER = Option('ogg_encoder', 'oggenc')
+OGG_ENCODER_OPTS = Option('ogg_encoder_opts', '-q5')
 
 #CDDB Server and Options
 CDDB_SERVER = Option('cddb_server', 'http://freedb.freedb.org/~cddb/cddb.cgi')
-
-#ENCODER options
-#RIPPER options
 
 rox.app_options.notify()
 
@@ -475,8 +484,8 @@ class Ripper(rox.Window):
 		except:
 			int_year = 1
 
-		lame_cmd = ENCODER.value
-		lame_opts = ENCODER_OPTS.value
+		lame_cmd = MP3_ENCODER.value
+		lame_opts = MP3_ENCODER_OPTS.value
 		lame_tags = '--ta "%s" --tt "%s" --tl "%s" --tg "%s" --tn %d --ty %d' % (
 					artist, track, album, genre, tracknum+1, int_year)
 		lame_args = '"%s" "%s"' % (strip_illegal(track)+'.wav', strip_illegal(track)+'.mp3')
@@ -502,6 +511,69 @@ class Ripper(rox.Window):
 
 		if self.stop_request:
 			os.kill(thing.pid, signal.SIGKILL)
+		elif HAVE_XATTR:
+			try:
+				filename = strip_illegal(track)+'.mp3'
+				xattr.setxattr(filename, 'user.Title', track)
+				xattr.setxattr(filename, 'user.Artist', artist)
+				xattr.setxattr(filename, 'user.Album', album)
+				xattr.setxattr(filename, 'user.Genre', genre)
+				xattr.setxattr(filename, 'user.Track', '%d' % tracknum)
+				xattr.setxattr(filename, 'user.Year', year)
+			except:
+				pass
+
+		code = thing.wait()
+		self.status_update(tracknum, 'enc', 100)
+		#print code
+		return code
+
+
+	def get_ogg(self, tracknum, track, artist, genre, album, year):
+		'''Run oggenc to encode a wav file to ogg'''
+		try:
+			int_year = int(year)
+		except:
+			int_year = 1
+
+		ogg_cmd = OGG_ENCODER.value
+		ogg_opts = OGG_ENCODER_OPTS.value
+		ogg_tags = '-a "%s" -t "%s" -l "%s" -G "%s" -N %d -d %d' % (
+					artist, track, album, genre, tracknum+1, int_year)
+		ogg_args = '"%s"' % (strip_illegal(track)+'.wav')
+
+		#print ogg_opts, ogg_tags, ogg_args
+
+		thing = popen2.Popen4(ogg_cmd+' '+ogg_opts+' '+ogg_tags+' '+ogg_args )
+		outfile = thing.fromchild
+
+		while True:
+			line = myreadline(outfile)
+			if line:
+				#print line
+				#for some reason getting this right for ogg was a royal pain.
+				x = re.match('^.*\[[\s]*([.0-9]+)%\]', line)
+				if x:
+					percent = float(x.group(1))
+					self.status_update(tracknum, 'enc', percent)
+			else:
+				break
+			if self.stop_request:
+				break
+
+		if self.stop_request:
+			os.kill(thing.pid, signal.SIGKILL)
+		elif HAVE_XATTR:
+			try:
+				filename = strip_illegal(track)+'.ogg'
+				xattr.setxattr(filename, 'user.Title', track)
+				xattr.setxattr(filename, 'user.Artist', artist)
+				xattr.setxattr(filename, 'user.Album', album)
+				xattr.setxattr(filename, 'user.Genre', genre)
+				xattr.setxattr(filename, 'user.Track', '%d' % tracknum)
+				xattr.setxattr(filename, 'user.Year', year)
+			except:
+				pass
 
 		code = thing.wait()
 		self.status_update(tracknum, 'enc', 100)
@@ -575,9 +647,14 @@ class Ripper(rox.Window):
 			(track, tracknum) = self.wavqueue.get(True)
 			if track == None:
 				break
-			status = self.get_lame(tracknum, track, self.artist, self.genre, self.album, self.year)
+
+			if ENCODER.value == 'MP3':
+				status = self.get_lame(tracknum, track, self.artist, self.genre, self.album, self.year)
+			else:
+				status = self.get_ogg(tracknum, track, self.artist, self.genre, self.album, self.year)
+
 			if status <> 0:
-				print 'lame died %d' % status
+				print 'encoder died %d' % status
 				self.status_update(tracknum, 'enc_error', 0)
 			try: os.unlink(strip_illegal(track)+".wav")
 			except:	pass

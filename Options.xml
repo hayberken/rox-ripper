@@ -31,13 +31,29 @@ To run at lower priority run with 'nice'. (e.g. 'nice cdda2wav')
 	</section>
 
 	<section title='Encoder'>
-		<entry name='encoder' label='MP3 Encoder'>
+		<hbox>
+		<label>Encoder</label>
+		<spacer/>
+		<radio-group name='encoder'>
+			<radio label='mp3' value='MP3'/>
+			<radio label='ogg' value='OGG'/>
+		</radio-group>
+		</hbox>
+		<entry name='mp3_encoder' label='MP3 Encoder'>
 The application used for encoding to MP3.
 If this is not in your PATH you need to give the full path to the executable.
 To run at lower priority run with 'nice'. (e.g. 'nice lame')
 		</entry>
-		<entry name='encoder_opts' label='Options'>
+		<entry name='mp3_encoder_opts' label='Options'>
 		Options for the encoder.  For example: vbr, id3 tags, min bitrate.
+		</entry>
+		<entry name='ogg_encoder' label='OGG Encoder'>
+The application used for encoding to OGG.
+If this is not in your PATH you need to give the full path to the executable.
+To run at lower priority run with 'nice'. (e.g. 'nice oggenc')
+		</entry>
+		<entry name='ogg_encoder_opts' label='Options'>
+		Options for the encoder.  For example: ???.
 		</entry>
 	</section>
 

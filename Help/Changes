@@ -1,18 +1,21 @@
-0.0.2 (02-22-2004)
+003 (09-Apr-2004)
+- Add OGG support
+- Add Extended Attribute support
 
-* Croak with a specific message if thread support not present.
-* Added Eject After Ripping option.
-* Improve Option tooltips
-* Moved socket timeout code to PyCDDB and don't fail if python < 2.3.
-* Changed Genre entry to a ComboBox and pulled in genre list from ID3.py/MusicBox.
-* Removed borders to look better with openbox and other WMs that do not have borders on
-	all sides of windows.
-* Auto resize columns after getting/editing track names.
-* Fix CD change and update track info logic.  Should be really solid now.
-* Fix off by one error on track times.  (first two songs always had the same time)
-* Don't return empty track list if cddb query fails.  Use Track# instead.
-* Fix race condition between ripping and encoding threads when aborting (Stop).
-* Prepared for translations.
+002 (22-Feb-2004)
+
+- Croak with a specific message if thread support not present.
+- Added Eject After Ripping option.
+- Improve Option tooltips
+- Moved socket timeout code to PyCDDB and don't fail if python < 2.3.
+- Changed Genre entry to a ComboBox and pulled in genre list from ID3.py/MusicBox.
+- Removed borders to look better with openbox and other WMs that do not have borders on all sides of windows.
+- Auto resize columns after getting/editing track names.
+- Fix CD change and update track info logic.  Should be really solid now.
+- Fix off by one error on track times.  (first two songs always had the same time)
+- Don't return empty track list if cddb query fails.  Use Track# instead.
+- Fix race condition between ripping and encoding threads when aborting (Stop).
+- Prepared for translations.
 
 
-0.0.1  First release
+001  First release

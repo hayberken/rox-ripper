@@ -1,6 +1,5 @@
 TODO items for Ripper
 
-* Add Ogg support
 * Support cdparanoia and other ripper/encoders.
 * Provide list of alternate CDDB query results to allow user to choose
 	(currently just picks one at random)

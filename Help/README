@@ -1,10 +1,10 @@
 			Ripper
-			A MP3 ripper/encoder
+			A MP3/OGG ripper/encoder
 			by Ken Hayber
 
 Brief
 ~~~~~
-GUI front-end to cdda2wav and lame to rip and encode CD music to mp3
+GUI front-end to cdda2wav and lame to rip and encode CD music to mp3 or ogg
 The latest version of Ripper is at:
 
 	http://khayber.dyndns.org/rox/ripper
@@ -53,7 +53,7 @@ while the previous one is still encoding.  However the new CD will not be read u
 encoding is done.
 
 Double clicking on each song will let you edit the track name.  The track name is used
-in the mp3 id tag literally, but the mp3 filename has certain characters replaced
+in the id tag literally, but the output filename has certain characters replaced
 automatically.  (there may later be an option to edit this replacement list.  there may
 also later be an option to allow things like Year, Genre, Artist, etc. to be edited
 per song this way.)
