@@ -8,6 +8,10 @@ import getpass
 import string
 import re
 import socket
+try:
+	socket.setdefaulttimeout(30) #don't want things to wait forever now do we?
+except:
+	pass
 
 __version__ = "0.1.0"
 

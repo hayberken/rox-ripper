@@ -26,11 +26,42 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-Please report any bugs to me, <khayber at socal dot rr dot com>
+Please report any bugs to me, Ken Hayber <khayber@socal.rr.com>
 
 
 Instructions
 ~~~~~~~~~~~~
 Extract the tgz file and run the application.  Select the Preferences button and configure
 things for your system.  It is best if you are familiar with making cdda2wav and lame
-work from the command line.  Email the author for help :)
+work from the command line.
+
+The LUN value in Options|Ripper is the device that is actually used by cdda2wav for ripping.
+If you have an IDE/ATAPI cdrom drive you may need to use the 'ATAPI:' prefix.  Otherwise
+(e.g. you are using scsi or ide-scsi) just the normal lun specification should work.
+
+Some options necessary to make cdda2wav and lame work with Ripper are hardcoded into the
+application.  Others may be added by the user.  See the cdda2wav and lame man pages.
+
+The refresh button will re-query the cddb server and reload the cd information.  Currently,
+if there are multiple returns from cddb one is chosen at random, so repeated clicking of
+the refresh button is the only way to see the others (this will change).
+
+Clicking the rip & encode button starts ripping and encoding as parallel threads.  The
+progress of each song is shown.  Ripping will almost always finish long before Encoding.
+Therefore you may eject the CD (there is an auto setting for this) and load another CD
+while the previous one is still encoding.  However the new CD will not be read until the
+encoding is done.
+
+Double clicking on each song will let you edit the track name.  The track name is used
+in the mp3 id tag literally, but the mp3 filename has certain characters replaced
+automatically.  (there may later be an option to edit this replacement list.  there may
+also later be an option to allow things like Year, Genre, Artist, etc. to be edited
+per song this way.)
+
+Clicking the Stop button aborts both ripping and encoding and displays 'error' in the
+status area.
+
+Each wav file is deleted after encoding, whether successful or not.
+
+
+Email the author for help :)

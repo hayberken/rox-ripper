@@ -11,22 +11,30 @@
 
 	<section title='Ripper'>
 		<entry name='ripper' label='Ripper'>
-		The application used for ripping from CD.
+The application used for ripping from CD.
+If this is not in your PATH you need to give the full path to the executable.
+To run at lower priority run with 'nice'. (e.g. 'nice cdda2wav')
 		</entry>
 		<entry name='ripper_dev' label='Device'>
 		Device name of cdrom.  For example: /dev/cdrom.
 		</entry>
 		<entry name='ripper_lun' label='LUN'>
-		SCSI-style device name.  For example: ATAPI:0,1,0.
+		SCSI-style device name.  For example: 0,0,1 or ATAPI:0,1,0.
 		</entry>
 		<entry name='ripper_opts' label='Options'>
 		Options for the encoder.  For example: quality, speed, etc.
 		</entry>
+		<toggle name='eject_after_rip' label='Eject after Rip'>
+		Eject CD after ripping is complete (Encoding may still be running).
+		</toggle>
+
 	</section>
 
 	<section title='Encoder'>
 		<entry name='encoder' label='MP3 Encoder'>
-		The application used for encoding to MP3.
+The application used for encoding to MP3.
+If this is not in your PATH you need to give the full path to the executable.
+To run at lower priority run with 'nice'. (e.g. 'nice lame')
 		</entry>
 		<entry name='encoder_opts' label='Options'>
 		Options for the encoder.  For example: vbr, id3 tags, min bitrate.

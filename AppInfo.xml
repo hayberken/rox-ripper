@@ -3,8 +3,8 @@
   <Summary xml:lang="en">MP3 CD Ripper</Summary>
   <About xml:lang="en">
     <Purpose>MP3 CD Ripper</Purpose>
-    <Author>Ken Hayber (portions rds@rdsarts.com)</Author>
-    <Version>0.0.1</Version>
+    <Author>Ken Hayber</Author>
+    <Version>0.0.2</Version>
     <License>GNU General Public License</License>
     <Homepage>http://khayber.dyndns.org/rox/ripper</Homepage>
   </About>
