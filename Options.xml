@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<options>
+	<section title="Locations">
+		<entry name='library' label='Music'>
+		The (optional) default location of your music.
+		</entry>
+		<entry name='cddb_server' label='CDDB'>
+		The full url to reach freedb or equivalent.  By default this is 'http://freedb.freedb.org/~cddb/cddb.cgi', but there are mirrors. Leave blank to disable CDDB queries.
+		</entry>
+	</section>
+
+	<section title='Ripper'>
+		<entry name='ripper' label='Ripper'>
+		The application used for ripping from CD.
+		</entry>
+		<entry name='ripper_dev' label='Device'>
+		Device name of cdrom.  For example: /dev/cdrom.
+		</entry>
+		<entry name='ripper_lun' label='LUN'>
+		SCSI-style device name.  For example: ATAPI:0,1,0.
+		</entry>
+		<entry name='ripper_opts' label='Options'>
+		Options for the encoder.  For example: quality, speed, etc.
+		</entry>
+	</section>
+
+	<section title='Encoder'>
+		<entry name='encoder' label='MP3 Encoder'>
+		The application used for encoding to MP3.
+		</entry>
+		<entry name='encoder_opts' label='Options'>
+		Options for the encoder.  For example: vbr, id3 tags, min bitrate.
+		</entry>
+	</section>
+
+</options>

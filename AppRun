@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+import findrox; findrox.version(1, 9, 8)
+import rox
+from rox import g
+
+import ripper
+
+try:
+	g.threads_init()
+
+	theapp = ripper.Ripper()
+	theapp.show()
+
+	rox.mainloop()
+except:
+	rox.report_exception()
