@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: trunk 004\n"
+"Project-Id-Version: Ripper 004\n"
 "PO-Revision-Date: Sun Apr 18 08:21:53 2004\n"
 "Last-Translator: Ken Hayber <khayber@socal.rr.com\n"
 "Language-Team: Ken Hayber <khayber@socal.rr.com\n"
@@ -199,4 +199,3 @@ msgstr ""
 #: ripper.py:692 ripper.py:694 ripper.py:703
 msgid "Ripping"
 msgstr ""
-

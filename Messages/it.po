@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: trunk 004\n"
+"Project-Id-Version: Ripper 004\n"
 "PO-Revision-Date: Sun Apr 18 08:21:53 2004\n"
 "Last-Translator: Yuri Bongiorno http://yuri.webhop.org, 2004.\n"
 "Language-Team: Yuri Bongiorno http://yuri.webhop.org, 2004.\n"
@@ -213,4 +213,3 @@ msgstr "Sono state prese le informazioni del disco"
 #: ripper.py:692 ripper.py:694 ripper.py:703
 msgid "Ripping"
 msgstr "Rip"
-
