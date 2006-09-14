@@ -151,6 +151,7 @@ class Ripper(rox.Window):
 		self.is_encoding = False
 		self.is_cddbing = False
 		self.stop_request = False
+		self.closing = False
 
 		cd_logic.set_dev(RIPPER_DEV.value)
 		self.cd_status = cd_logic.check_dev()
@@ -292,6 +293,9 @@ class Ripper(rox.Window):
 							self.do_get_tracks()
 					self.cd_status_changed = False
 	
+			if self.closing:
+				break
+
 			yield tasks.TimeoutBlocker(1)
 	
 
@@ -303,7 +307,7 @@ class Ripper(rox.Window):
 		self.year = self.year_entry.get_text()
 
 
-	def stop(self, it):
+	def stop(self, *it):
 		'''Stop current rip/encode process'''
 		self.stop_request = True
 
@@ -726,7 +730,9 @@ class Ripper(rox.Window):
 		self.close()
 
 	def close(self, button = None):
-		'''We're outta here!'''
+		'''We are outta here!'''
+		self.stop()
+		self.closing = True
 		self.destroy()
 
 
