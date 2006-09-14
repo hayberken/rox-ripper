@@ -3,7 +3,7 @@
 echo Extracting messages from source files...
 echo
 
-python ./tips.py
+python ./make_tips
 (cd ..; pygettext *.py tips)
 
 echo

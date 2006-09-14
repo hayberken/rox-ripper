@@ -1,3 +1,9 @@
+006 (13-Sep-2006)
+- Remove Threads usage (using ROX-Lib's tasks module)
+- Modularize the UI code
+
+005 (Skipped)
+
 004 (15-May-2004)
 - Add a Menu
 - Italian translation from Yuri Bongiorno
@@ -8,7 +14,6 @@
 - Add Extended Attribute support
 
 002 (22-Feb-2004)
-
 - Croak with a specific message if thread support not present.
 - Added Eject After Ripping option.
 - Improve Option tooltips
@@ -21,6 +26,5 @@
 - Don't return empty track list if cddb query fails.  Use Track# instead.
 - Fix race condition between ripping and encoding threads when aborting (Stop).
 - Prepared for translations.
-
 
 001  First release

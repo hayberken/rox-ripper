@@ -1,37 +1,40 @@
 # Ripper.
 # Copyright (C) 2004 Kenneth D. Hayber
 # Ken Hayber <khayber@socal.rr.com, 2004
-#
+# Ken Hayber <khayber@socal.rr.co>, 2006.
+# 
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: Ripper 004\n"
-"PO-Revision-Date: Sun Apr 18 08:21:53 2004\n"
-"Last-Translator: Ken Hayber <khayber@socal.rr.com\n"
-"Language-Team: Ken Hayber <khayber@socal.rr.com\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: (null)\n"
+"PO-Revision-Date: 2006-03-24 12:10+0100\n"
+"Last-Translator: Juan Carlos Jimenez Garcia <jigarNOSPAM@alumni.uv.es>\n"
+"Language-Team: Spanish/Spain <es@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: pygettext.py 1.1\n"
 
 #: ripper.py:249
 msgid "Album"
-msgstr ""
+msgstr "Álbum"
 
 #: ripper.py:181
 msgid "Quit"
-msgstr ""
+msgstr "Salir"
 
 #: ripper.py:652 ripper.py:657
 msgid "done"
-msgstr ""
+msgstr "Hecho"
 
 #: tips:21
 msgid "mp3"
-msgstr ""
+msgstr "mp3"
 
 #: tips:4
 msgid "CDDB"
-msgstr ""
+msgstr "CDDB"
 
 #: tips:9
 msgid ""
@@ -40,62 +43,68 @@ msgid ""
 "executable.\n"
 "To run at lower priority run with 'nice'. (e.g. 'nice cdda2wav')"
 msgstr ""
+"La aplicación usada para extraer CDs.\n"
+"Si este no es su PATH necesitarás dar la ruta completa a el ejecutable.\n"
+"Para ejecutar en prioridad baja ejecuta con 'nice'. (e.j. 'nice cdda2wav')"
 
 #: tips:12
 msgid "LUN"
-msgstr ""
+msgstr "Interfaz"
 
 #: ripper.py:229
 msgid "Status"
-msgstr ""
+msgstr "Estado"
 
 #: tips:30 tips:31 tips:32
 msgid "Options for the encoder.  For example: ???."
-msgstr ""
+msgstr "Opciones para el codificador.  Por ejemplo: ???."
 
 #: tips:16
 msgid "Eject after Rip"
-msgstr ""
+msgstr "Expulsar después de extraer"
 
 #: ripper.py:217 ripper.py:396
 msgid "Track"
-msgstr ""
+msgstr "Pista"
 
 #: ripper.py:244
 msgid "Artist"
-msgstr ""
+msgstr "Artista"
 
 #: ripper.py:177 ripper.py:190
 msgid "Stop"
-msgstr ""
+msgstr "Detener"
 
 #: ripper.py:328
 msgid "<no disc>"
-msgstr ""
+msgstr "<ningún disco>"
 
 #: tips:17 tips:18
 msgid "Eject CD after ripping is complete (Encoding may still be running)."
 msgstr ""
+"Expulsa el CD después de completar la extracción (La codificación puede que "
+"esté todavía ejecutándose)."
 
 #: tips:7 tips:8
 msgid "Ripper"
-msgstr ""
+msgstr "Extractor de CDs de audio"
 
 #: tips:26
 msgid "Options for the encoder.  For example: vbr, id3 tags, min bitrate."
 msgstr ""
+"Opciones para el codificador.  Por ejemplo: vbr, id3 tags, min bitrate."
 
 #: ripper.py:256
 msgid "Genre"
-msgstr ""
+msgstr "Género"
 
 #: ripper.py:413
 msgid "Got Track Info"
-msgstr ""
+msgstr "Obtener Info de las Pistas"
 
 #: tips:23
 msgid "MP3 Encoder"
-msgstr ""
+msgstr "Codificador MP3"
 
 #: ripper.py:180
 msgid "Info"
@@ -103,23 +112,23 @@ msgstr ""
 
 #: tips:2
 msgid "Music"
-msgstr ""
+msgstr "Música"
 
 #: ripper.py:189
 msgid "Settings"
-msgstr ""
+msgstr "Preferencias"
 
 #: ripper.py:176 ripper.py:192
 msgid "Reload CD"
-msgstr ""
+msgstr "Recargar CD"
 
 #: tips:11
 msgid "Device name of cdrom.  For example: /dev/cdrom."
-msgstr ""
+msgstr "Nombre del dispositivo de cdrom.  Por ejemplo: /dev/cdrom."
 
 #: ripper.py:659 ripper.py:661
 msgid "error"
-msgstr ""
+msgstr "error"
 
 #: tips:24
 msgid ""
@@ -128,14 +137,16 @@ msgid ""
 "executable.\n"
 "To run at lower priority run with 'nice'. (e.g. 'nice lame')"
 msgstr ""
+"La aplicación usada para codificar a MP3.\n"
+"Si esta no está en su PATH necesitará dar la ruta completa para el"
 
 #: tips:10
 msgid "Device"
-msgstr ""
+msgstr "Dispositivo"
 
 #: tips:3
 msgid "The (optional) default location of your music."
-msgstr ""
+msgstr "La localización predeterminada (opcional) de su música."
 
 #: ripper.py:193
 msgid "Show destination dir"
@@ -148,10 +159,12 @@ msgid ""
 "executable.\n"
 "To run at lower priority run with 'nice'. (e.g. 'nice oggenc')"
 msgstr ""
+"La aplicación usada para codificar a OGG.\n"
+"Si esta no está en su PATH necesitará dar la ruta completa para el"
 
 #: ripper.py:223
 msgid "Time"
-msgstr ""
+msgstr "Duración"
 
 #: tips:5 tips:6
 msgid ""
@@ -159,46 +172,50 @@ msgid ""
 "freedb.freedb.org/~cddb/cddb.cgi', but there are mirrors. Leave blank to "
 "disable CDDB queries."
 msgstr ""
+"La dirección completa para conectar a freedb o equivalente.  Por defecto "
+"esta es 'http://freedb.freedb.org/~cddb/cddb.cgi', pero hay mirrors. Déjela "
+"en blanco para desactivar las búsquedas CDDB."
 
 #: ripper.py:179 tips:14 tips:25 tips:29
 msgid "Options"
-msgstr ""
+msgstr "Preferencias"
 
 #: tips:15
 msgid "Options for the encoder.  For example: quality, speed, etc."
-msgstr ""
+msgstr "Opciones para el codificador.  Por ejemplo: calidad, velocidad, etc."
 
 #: tips:13
 msgid "SCSI-style device name.  For example: 0,0,1 or ATAPI:0,1,0."
 msgstr ""
+"Nombre del dispositivo al estilo SCSI.  Por ejemplo: 0,0,1 ó ATAPI:0,1,0."
 
 #: tips:27
 msgid "OGG Encoder"
-msgstr ""
+msgstr "Codificador OGG"
 
 #: ripper.py:655 ripper.py:657 ripper.py:661
 msgid "Encoding"
-msgstr ""
+msgstr "Codificando"
 
 #: tips:22
 msgid "ogg"
-msgstr ""
+msgstr "ogg"
 
 #: tips:1
 msgid "Locations"
-msgstr ""
+msgstr "Localizaciones"
 
 #: ripper.py:175 ripper.py:191
 msgid "Rip & Encode"
-msgstr ""
+msgstr "Extraer y Codificar"
 
 #: tips:19 tips:20
 msgid "Encoder"
-msgstr ""
+msgstr "Codificar"
 
 #: ripper.py:261
 msgid "Year"
-msgstr ""
+msgstr "Año"
 
 #: ripper.py:194
 msgid "Close"
@@ -206,8 +223,8 @@ msgstr ""
 
 #: ripper.py:403
 msgid "Got Disc Info"
-msgstr ""
+msgstr "Obtener información del disco"
 
 #: ripper.py:650 ripper.py:652 ripper.py:659
 msgid "Ripping"
-msgstr ""
+msgstr "Extrayendo"

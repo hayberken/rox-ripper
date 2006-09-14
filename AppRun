@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-try:
-	import findrox; findrox.version(1, 9, 13)
-	import rox, gtk, os
+import findrox; findrox.version(2,0,0)
+import rox, gtk, os
 
+try:
 	__builtins__._ = rox.i18n.translation(os.path.join(rox.app_dir, 'Messages'))
 
 	from optparse import OptionParser
@@ -18,11 +18,6 @@ try:
 	if options.options:
 		rox.edit_options()
 	else:
-		try:
-			gtk.threads_init()
-		except:
-			rox.croak("Ripper needs threads support and you don't have it")
-
 		theapp = ripper.Ripper()
 		theapp.show()
 

@@ -13,15 +13,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.1\n"
 
-#: ripper.py:197
+#: ripper.py:249
 msgid "Album"
 msgstr "Album"
 
-#: ripper.py:234
+#: ripper.py:181
 msgid "Quit"
 msgstr ""
 
-#: ripper.py:694 ripper.py:700
+#: ripper.py:652 ripper.py:657
 msgid "done"
 msgstr "fatto"
 
@@ -48,7 +48,7 @@ msgstr ""
 msgid "LUN"
 msgstr "LUN"
 
-#: ripper.py:164
+#: ripper.py:229
 msgid "Status"
 msgstr "Stato"
 
@@ -60,19 +60,19 @@ msgstr "Opzioni per l'encoder. Per esempio: ?"
 msgid "Eject after Rip"
 msgstr "Espulsione dopo il rip"
 
-#: ripper.py:151 ripper.py:400
+#: ripper.py:217 ripper.py:396
 msgid "Track"
 msgstr "Traccia"
 
-#: ripper.py:192
+#: ripper.py:244
 msgid "Artist"
 msgstr "Artista"
 
-#: ripper.py:179 ripper.py:231
+#: ripper.py:177 ripper.py:190
 msgid "Stop"
 msgstr "Ferma"
 
-#: ripper.py:325
+#: ripper.py:328
 msgid "<no disc>"
 msgstr "<nessun disco>"
 
@@ -90,11 +90,11 @@ msgstr "Ripper"
 msgid "Options for the encoder.  For example: vbr, id3 tags, min bitrate."
 msgstr "Opzioni per l'encoder. Per esempio: vbr, id3 tags, min bitrate."
 
-#: ripper.py:204
+#: ripper.py:256
 msgid "Genre"
 msgstr "Genere"
 
-#: ripper.py:418
+#: ripper.py:413
 msgid "Got Track Info"
 msgstr "Sono state prese le informazioni della traccia"
 
@@ -102,19 +102,27 @@ msgstr "Sono state prese le informazioni della traccia"
 msgid "MP3 Encoder"
 msgstr "Encoder mp3"
 
-#: tips:14 tips:25 tips:29
-msgid "Options"
-msgstr "Opzioni"
+#: ripper.py:180
+msgid "Info"
+msgstr ""
 
-#: ripper.py:177 ripper.py:233
+#: tips:2
+msgid "Music"
+msgstr "Brani"
+
+#: ripper.py:189
 msgid "Settings"
 msgstr "Impostazioni"
 
-#: ripper.py:183 ripper.py:230
+#: ripper.py:176 ripper.py:192
 msgid "Reload CD"
 msgstr "Ricarica CD"
 
-#: ripper.py:703 ripper.py:706
+#: tips:11
+msgid "Device name of cdrom.  For example: /dev/cdrom."
+msgstr "Il nome di device del cdrom. Per esempio: /dev/cdrom."
+
+#: ripper.py:659 ripper.py:661
 msgid "error"
 msgstr "errore"
 
@@ -137,6 +145,10 @@ msgstr "Device"
 msgid "The (optional) default location of your music."
 msgstr "La posizione predefinita (opzionale) dei brani musicali."
 
+#: ripper.py:193
+msgid "Show destination dir"
+msgstr ""
+
 #: tips:28
 msgid ""
 "The application used for encoding to OGG.\n"
@@ -148,7 +160,7 @@ msgstr ""
 "Se non  nel PATH  necessario specificare il percorso completo.\n"
 "Per eseguirla a bassa priorit, usare nice (ad es. nice oggenc)."
 
-#: ripper.py:158
+#: ripper.py:223
 msgid "Time"
 msgstr "Tempo"
 
@@ -162,9 +174,9 @@ msgstr ""
 "org/~cddb/cddb.cgi, ma ci sono anche i mirror. Lasciarlo bianco per "
 "disabilitare le interrogazioni CDDB."
 
-#: tips:11
-msgid "Device name of cdrom.  For example: /dev/cdrom."
-msgstr "Il nome di device del cdrom. Per esempio: /dev/cdrom."
+#: ripper.py:179 tips:14 tips:25 tips:29
+msgid "Options"
+msgstr "Opzioni"
 
 #: tips:15
 msgid "Options for the encoder.  For example: quality, speed, etc."
@@ -178,7 +190,7 @@ msgstr "Il nome del device SCSI. Per esempio: 0,0,1 o ATAPI:0,1,0."
 msgid "OGG Encoder"
 msgstr "Encoder ogg"
 
-#: ripper.py:698 ripper.py:700 ripper.py:706
+#: ripper.py:655 ripper.py:657 ripper.py:661
 msgid "Encoding"
 msgstr "Codifica"
 
@@ -190,7 +202,7 @@ msgstr "ogg"
 msgid "Locations"
 msgstr "Collocazioni"
 
-#: ripper.py:181 ripper.py:229
+#: ripper.py:175 ripper.py:191
 msgid "Rip & Encode"
 msgstr "Fa il rip e codifica"
 
@@ -198,18 +210,18 @@ msgstr "Fa il rip e codifica"
 msgid "Encoder"
 msgstr "Encoder"
 
-#: ripper.py:209
+#: ripper.py:261
 msgid "Year"
 msgstr "Anno"
 
-#: tips:2
-msgid "Music"
-msgstr "Brani"
+#: ripper.py:194
+msgid "Close"
+msgstr ""
 
-#: ripper.py:408
+#: ripper.py:403
 msgid "Got Disc Info"
 msgstr "Sono state prese le informazioni del disco"
 
-#: ripper.py:692 ripper.py:694 ripper.py:703
+#: ripper.py:650 ripper.py:652 ripper.py:659
 msgid "Ripping"
 msgstr "Rip"

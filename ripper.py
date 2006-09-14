@@ -2,7 +2,7 @@
 	ripper.py
 		GUI front-end to cdda2wav and lame.
 
-	Copyright 2004 Kenneth Hayber <khayber@socal.rr.com>
+	Copyright 2004-2006 Kenneth Hayber <ken@hayber.us>
 		All rights reserved.
 
 	This program is free software; you can redistribute it and/or modify
@@ -20,12 +20,11 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
 
-import gtk, os, sys, signal, re, string, socket, time, popen2, threading, Queue
+import gtk, os, sys, signal, re, string, socket, time, popen2, Queue
 from random import Random
-from threading import *
 
 import rox
-from rox import i18n, app_options, Menu, filer, InfoWin
+from rox import i18n, app_options, Menu, filer, InfoWin, tasks
 from rox.options import Option
 
 import PyCDDB, cd_logic, CDROM, genres
@@ -81,6 +80,12 @@ COL_TRACK = 1
 COL_TIME = 2
 COL_STATUS = 3
 
+DEBUG = 0
+def dbg(*args):
+	if DEBUG:
+		import sys
+		print >>sys.stderr, args
+
 
 # My gentoo python doesn't have universal line ending support compiled in
 # and these guys (cdda2wav and lame) use CR line endings to pretty-up their output.
@@ -129,9 +134,67 @@ class Ripper(rox.Window):
 		# Update things when options change
 		rox.app_options.add_notify(self.get_options)
 
+		self.build_gui()
+		self.build_toolbar()
+		self.build_menu()
 
-		#song list
-		#######################################
+		# Create layout, pack and show widgets
+		self.vbox = gtk.VBox()
+		self.add(self.vbox)
+		self.vbox.pack_start(self.toolbar, False, True, 0)
+		self.vbox.pack_start(self.table, False, True, 0)
+		self.vbox.pack_start(self.scroll_window, True, True, 0)
+		self.vbox.show_all()
+
+		# Defaults and Misc
+		self.is_ripping = False
+		self.is_encoding = False
+		self.is_cddbing = False
+		self.stop_request = False
+
+		cd_logic.set_dev(RIPPER_DEV.value)
+		self.cd_status = cd_logic.check_dev()
+		self.disc_id = None
+		self.cd_status_changed = False
+
+		if self.cd_status in [CDROM.CDS_TRAY_OPEN, CDROM.CDS_NO_DISC]:
+			self.no_disc()
+		else:
+			self.do_get_tracks()
+
+		tasks.Task(self.update_gui())
+
+
+	def build_menu(self):
+		self.add_events(gtk.gdk.BUTTON_PRESS_MASK)
+		self.connect('button-press-event', self.button_press)
+		self.view.add_events(gtk.gdk.BUTTON_PRESS_MASK)
+		self.view.connect('button-press-event', self.button_press)
+
+		self.menu = Menu.Menu('main', [
+			Menu.Action(_('Rip & Encode'), 'rip_n_encode', '', gtk.STOCK_EXECUTE),
+			Menu.Action(_('Reload CD'), 'do_get_tracks', '', gtk.STOCK_REFRESH),
+			Menu.Action(_('Stop'), 'stop', '', gtk.STOCK_STOP),
+			Menu.Separator(),
+			Menu.Action(_('Options'), 'show_options', '', gtk.STOCK_PREFERENCES),
+			Menu.Action(_('Info'),	'get_info', '', gtk.STOCK_DIALOG_INFO),
+			Menu.Action(_("Quit"), 'close', '', gtk.STOCK_CLOSE),
+			])
+		self.menu.attach(self,self)
+
+
+	def build_toolbar(self):
+		self.toolbar = gtk.Toolbar()
+		self.toolbar.set_style(gtk.TOOLBAR_ICONS)
+		self.toolbar.insert_stock(gtk.STOCK_PREFERENCES, _('Settings'), None, self.show_options, None, 0)
+		self.stop_btn = self.toolbar.insert_stock(gtk.STOCK_STOP, _('Stop'), None, self.stop, None, 0)
+		self.rip_btn = self.toolbar.insert_stock(gtk.STOCK_EXECUTE, _('Rip & Encode'), None, self.rip_n_encode, None, 0)
+		self.refresh_btn = self.toolbar.insert_stock(gtk.STOCK_REFRESH, _('Reload CD'), None, self.do_get_tracks, None, 0)
+		self.toolbar.insert_stock(gtk.STOCK_GO_UP, _('Show destination dir'), None, self.show_dir, None, 0)
+		self.toolbar.insert_stock(gtk.STOCK_CLOSE, _('Close'), None, self.close, None, 0)
+
+
+	def build_gui(self):
 		swin = gtk.ScrolledWindow()
 		self.scroll_window = swin
 		swin.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -154,7 +217,6 @@ class Ripper(rox.Window):
 		column = gtk.TreeViewColumn(_('Track'), cell, text = COL_TRACK)
 		view.append_column(column)
 		column.set_resizable(True)
-		#column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
 		column.set_reorderable(False)
 
 		cell = gtk.CellRendererText()
@@ -172,25 +234,6 @@ class Ripper(rox.Window):
 		view.connect('row-activated', self.activate)
 		self.selection = view.get_selection()
 		self.handler = self.selection.connect('changed', self.set_selection)
-
-
-		self.toolbar = gtk.Toolbar()
-		self.toolbar.set_style(gtk.TOOLBAR_ICONS)
-		self.toolbar.insert_stock(gtk.STOCK_PREFERENCES,
-							_('Settings'), None, self.show_options, None, 0)
-		self.stop_btn = self.toolbar.insert_stock(gtk.STOCK_STOP,
-							_('Stop'), None, self.stop, None, 0)
-		self.rip_btn = self.toolbar.insert_stock(gtk.STOCK_EXECUTE,
-							_('Rip & Encode'), None, self.rip_n_encode, None, 0)
-		self.refresh_btn = self.toolbar.insert_stock(gtk.STOCK_REFRESH,
-							_('Reload CD'), None, self.do_get_tracks, None, 0)
-
-		self.toolbar.insert_stock(gtk.STOCK_GO_UP,
-							_('Show destination dir'), None, self.show_dir, None, 0)
-
-		self.toolbar.insert_stock(gtk.STOCK_CLOSE,
-							_('Close'), None, self.close, None, 0)
-
 
 		self.table = gtk.Table(5, 2, False)
 		x_pad = 2
@@ -219,84 +262,38 @@ class Ripper(rox.Window):
 		self.table.attach(self.year_entry,	1, 2, 5, 6, gtk.EXPAND|gtk.FILL, 0, x_pad, y_pad)
 
 
-		# Create layout, pack and show widgets
-		self.vbox = gtk.VBox()
-		self.add(self.vbox)
-		self.vbox.pack_start(self.toolbar, False, True, 0)
-		self.vbox.pack_start(self.table, False, True, 0)
-		self.vbox.pack_start(self.scroll_window, True, True, 0)
-		self.vbox.show_all()
-
-		# Menu
-		self.add_events(gtk.gdk.BUTTON_PRESS_MASK)
-		self.connect('button-press-event', self.button_press)
-		view.add_events(gtk.gdk.BUTTON_PRESS_MASK)
-		view.connect('button-press-event', self.button_press)
-
-		self.menu = Menu.Menu('main', [
-			Menu.Action(_('Rip & Encode'), 'rip_n_encode', '', gtk.STOCK_EXECUTE),
-			Menu.Action(_('Reload CD'), 'do_get_tracks', '', gtk.STOCK_REFRESH),
-			Menu.Action(_('Stop'), 'stop', '', gtk.STOCK_STOP),
-			Menu.Separator(),
-			Menu.Action(_('Options'), 'show_options', '', gtk.STOCK_PREFERENCES),
-			Menu.Action(_('Info'),	'get_info', '', gtk.STOCK_DIALOG_INFO),
-			Menu.Action(_("Quit"), 'close', '', gtk.STOCK_CLOSE),
-			])
-		self.menu.attach(self,self)
-
-		# Defaults and Misc
-		self.cddb_thd = None
-		self.ripper_thd = None
-		self.encoder_thd = None
-		self.is_ripping = False
-		self.is_encoding = False
-		self.is_cddbing = False
-		self.stop_request = False
-
-		cd_logic.set_dev(RIPPER_DEV.value)
-		self.cd_status = cd_logic.check_dev()
-		self.disc_id = None
-		self.cd_status_changed = False
-
-		if self.cd_status in [CDROM.CDS_TRAY_OPEN, CDROM.CDS_NO_DISC]:
-			self.no_disc()
-		else:
-			self.do_get_tracks()
-		gtk.timeout_add(1000, self.update_gui)
-
-
 	def update_gui(self):
-		'''Update button status based on current state'''
-		cd_status = cd_logic.check_dev()
-		if self.cd_status != cd_status:
-			self.cd_status = cd_status
-			self.cd_status_changed = True
-
-		if self.is_ripping or self.is_encoding:
-			self.stop_btn.set_sensitive(True)
-			self.rip_btn.set_sensitive(False)
-			self.refresh_btn.set_sensitive(False)
-
-		if not self.is_ripping and not self.is_encoding and not self.is_cddbing:
-			self.stop_btn.set_sensitive(False)
-			self.rip_btn.set_sensitive(True)
-			self.refresh_btn.set_sensitive(True)
-
-			#get tracks if cd changed and not doing other things
-			if self.cd_status_changed:
-				if self.cd_status in [CDROM.CDS_TRAY_OPEN, CDROM.CDS_NO_DISC]:
-					self.no_disc()
-					self.disc_id = None
-				else:
-					disc_id = cd_logic.get_disc_id()
-					if self.disc_id <> disc_id:
-						self.disc_id = disc_id
-						self.do_get_tracks()
-				self.cd_status_changed = False
-
-		#need this to keep the timer running(?)
-		return True
-
+		'''Update UI based on current state'''
+		while True:
+			cd_status = cd_logic.check_dev()
+			if self.cd_status != cd_status:
+				self.cd_status = cd_status
+				self.cd_status_changed = True
+	
+			if self.is_ripping or self.is_encoding:
+				self.stop_btn.set_sensitive(True)
+				self.rip_btn.set_sensitive(False)
+				self.refresh_btn.set_sensitive(False)
+	
+			if not self.is_ripping and not self.is_encoding and not self.is_cddbing:
+				self.stop_btn.set_sensitive(False)
+				self.rip_btn.set_sensitive(True)
+				self.refresh_btn.set_sensitive(True)
+	
+				#get tracks if cd changed and not doing other things
+				if self.cd_status_changed:
+					if self.cd_status in [CDROM.CDS_TRAY_OPEN, CDROM.CDS_NO_DISC]:
+						self.no_disc()
+						self.disc_id = None
+					else:
+						disc_id = cd_logic.get_disc_id()
+						if self.disc_id <> disc_id:
+							self.disc_id = disc_id
+							self.do_get_tracks()
+					self.cd_status_changed = False
+	
+			yield tasks.TimeoutBlocker(1)
+	
 
 	def stuff_changed(self, button=None):
 		'''Get new text from edit boxes and save it'''
@@ -306,50 +303,42 @@ class Ripper(rox.Window):
 		self.year = self.year_entry.get_text()
 
 
-	def runit(self, it):
-		'''Run a function in a thread'''
-		thd_it = Thread(name='mythread', target=it)
-		thd_it.setDaemon(True)
-		thd_it.start()
-		return thd_it
-
-
 	def stop(self, it):
 		'''Stop current rip/encode process'''
 		self.stop_request = True
+
 
 	def show_dir(self, *dummy):
 		''' Pops up a filer window. '''
 		temp = os.path.join(os.path.expanduser(LIBRARY.value), self.artist, self.album)
 		filer.show_file(temp)
 
+
 	def do_get_tracks(self, button=None):
 		'''Get the track info (cddb and cd) in a thread'''
 		if self.is_ripping:
 			return
-		self.cddb_thd = self.runit(self.get_tracks)
+		tasks.Task(self.get_tracks())
 
 
 	def no_disc(self):
 		'''Clear all info and display <no disc>'''
-		#print "no disc in tray?"
-		gtk.threads_enter()
+		dbg("no disc in tray?")
 		self.store.clear()
 		self.artist_entry.set_text(_('<no disc>'))
 		self.album_entry.set_text('')
 		self.genre_combo.entry.set_text('')
 		self.year_entry.set_text('')
 		self.view.columns_autosize()
-		gtk.threads_leave()
 
 
 	def get_tracks(self):
 		'''Get the track info (cddb and cd)'''
 		self.is_cddbing = True
 		stuff = self.get_cddb()
-		gtk.threads_enter()
 		(count, artist, album, genre, year, tracklist) = stuff
-		#print count, artist, album, genre, year, tracklist
+
+		yield None
 
 		self.artist = artist
 		self.count = count
@@ -365,28 +354,23 @@ class Ripper(rox.Window):
 
 		self.store.clear()
 		for track in tracklist:
-			#print song
+			dbg(track)
 			iter = self.store.append(None)
 			self.store.set(iter, COL_TRACK, track[0])
 			self.store.set(iter, COL_TIME, track[1])
 			self.store.set(iter, COL_ENABLE, True)
+			yield None
 
 		self.view.columns_autosize()
-		gtk.threads_leave()
 		self.is_cddbing = False
 
 
 	def get_cddb(self):
 		'''Query cddb for track and cd info'''
-		gtk.threads_enter()
 		dlg = gtk.MessageDialog(buttons=gtk.BUTTONS_CANCEL, message_format="Getting Track Info.")
-#		dlg.set_position(gtk.WIN_POS_NONE)
-#		(a, b) = dlg.get_size()
-#		(x, y) = self.get_position()
-#		(dx, dy) = self.get_size()
-#		dlg.move(x+dx/2-a/2, y+dy/2-b/2)
 		dlg.show()
-		gtk.threads_leave()
+		while gtk.events_pending():
+			gtk.main_iteration()
 
 		count = artist = genre = album = year = ''
 		tracklist = []
@@ -404,8 +388,7 @@ class Ripper(rox.Window):
 			cddb_id_string = ''
 			for n in cddb_id:
 				cddb_id_string += str(n)+' '
-			#print disc_id
-			#print cddb_id, cddb_id_string
+			#dbg(disc_id, cddb_id, cddb_id_string)
 
 			for i in range(count):
 				tracktime = cd_logic.get_track_time_total(i+1)
@@ -415,33 +398,33 @@ class Ripper(rox.Window):
 			try:
 				db = PyCDDB.PyCDDB(CDDB_SERVER.value)
 				query_info = db.query(cddb_id_string)
-				#print query_info
+				#dbg(query_info)
 
-				gtk.threads_enter()
 				dlg.set_title(_('Got Disc Info'))
-				gtk.threads_leave()
-
+				while gtk.events_pending():
+					gtk.main_iteration()
+				
 				#make sure we didn't get an error, then query CDDB
 				if len(query_info) > 0:
 					rndm = Random()
 					index = rndm.randrange(0, len(query_info))
 					read_info = db.read(query_info[index])
-					#print read_info
-					gtk.threads_enter()
+					#dbg(read_info)
 					dlg.set_title(_('Got Track Info'))
-					gtk.threads_leave()
+					while gtk.events_pending():
+						gtk.main_iteration()
 
 					try:
 						(artist, album) = query_info[index]['title'].split('/')
-						artist = artist.strip()
-						album = album.strip()
+						artist = artist.strip().decode('latin-1', 'replace')
+						album = album.strip().decode('latin-1', 'replace')
 						genre = query_info[index]['category']
 						if genre in ['misc', 'data']:
 							genre = 'Other'
 
-						print query_info['year']
-						print read_info['EXTD']
-						print read_info['YEARD']
+						#dbg(query_info['year'])
+						#dbg(read_info['EXTD'])
+						#dbg(read_info['YEARD'])
 
 						#x = re.match(r'.*YEAR: (.+).*',read_info['EXTD'])
 						#if x:
@@ -453,9 +436,9 @@ class Ripper(rox.Window):
 					if len(read_info['TTITLE']) > 0:
 						for i in range(count):
 							try:
-								track_name = read_info['TTITLE'][i]
+								track_name = read_info['TTITLE'][i].decode('latin-1', 'replace')
 								track_time = tracklist[i][1]
-								#print i, track_name, track_time
+								#dbg(i, track_name, track_time)
 								tracklist[i] = (track_name, track_time)
 							except:
 								pass
@@ -465,13 +448,11 @@ class Ripper(rox.Window):
 		except:
 			pass
 
-		gtk.threads_enter()
 		dlg.destroy()
-		gtk.threads_leave()
 		return count, artist, album, genre, year, tracklist
 
 
-	def get_cdda2wav(self, tracknum, track):
+	def run_cdda2wav(self, tracknum, track):
 		'''Run cdda2wav to rip a track from the CD'''
 		cdda2wav_cmd = RIPPER.value
 		cdda2wav_dev = RIPPER_DEV.value
@@ -479,33 +460,12 @@ class Ripper(rox.Window):
 		cdda2wav_args = '-g -D%s -A%s -t %d "%s"' % (
 						cdda2wav_lun, cdda2wav_dev, tracknum+1, strip_illegal(track))
 		cdda2wav_opts =  RIPPER_OPTS.value
-		#print cdda2wav_opts, cdda2wav_args
 
 		thing = popen2.Popen4(cdda2wav_cmd+' '+cdda2wav_opts+' '+cdda2wav_args )
-		outfile = thing.fromchild
-
-		while True:
-			line = myreadline(outfile)
-			if line:
-				x = re.match("(.+[\s]+)([0-9]+)%", line)
-				if x:
-					percent = int(x.group(2))
-					self.status_update(tracknum, 'rip', percent)
-			else:
-				break
-			if self.stop_request:
-				break
-
-		if self.stop_request:
-			os.kill(thing.pid, signal.SIGKILL)
-
-		code = thing.wait()
-		self.status_update(tracknum, 'rip', 100)
-		#print code
-		return code
+		return thing
 
 
-	def get_lame(self, tracknum, track, artist, genre, album, year):
+	def run_lame(self, tracknum, track, artist, genre, album, year):
 		'''Run lame to encode a wav file to mp3'''
 		try:
 			int_year = int(year)
@@ -518,46 +478,12 @@ class Ripper(rox.Window):
 					artist, track, album, genre, tracknum+1, int_year)
 		lame_args = '"%s" "%s"' % (strip_illegal(track)+'.wav', strip_illegal(track)+'.mp3')
 
-		#print lame_opts, lame_tags, lame_args
-
+		#dbg(lame_opts, lame_tags, lame_args)
 		thing = popen2.Popen4(lame_cmd+' '+lame_opts+' '+lame_tags+' '+lame_args )
-		outfile = thing.fromchild
-
-		while True:
-			line = myreadline(outfile)
-			if line:
-				#print line
-				#for some reason getting this right for lame was a royal pain.
-				x = re.match(r"^[\s]+([0-9]+)/([0-9]+)", line)
-				if x:
-					percent = int(100 * (float(x.group(1)) / float(x.group(2))))
-					self.status_update(tracknum, 'enc', percent)
-			else:
-				break
-			if self.stop_request:
-				break
-
-		if self.stop_request:
-			os.kill(thing.pid, signal.SIGKILL)
-		elif HAVE_XATTR:
-			try:
-				filename = strip_illegal(track)+'.mp3'
-				xattr.setxattr(filename, 'user.Title', track)
-				xattr.setxattr(filename, 'user.Artist', artist)
-				xattr.setxattr(filename, 'user.Album', album)
-				xattr.setxattr(filename, 'user.Genre', genre)
-				xattr.setxattr(filename, 'user.Track', '%d' % tracknum)
-				xattr.setxattr(filename, 'user.Year', year)
-			except:
-				pass
-
-		code = thing.wait()
-		self.status_update(tracknum, 'enc', 100)
-		#print code
-		return code
+		return thing
 
 
-	def get_ogg(self, tracknum, track, artist, genre, album, year):
+	def run_ogg(self, tracknum, track, artist, genre, album, year):
 		'''Run oggenc to encode a wav file to ogg'''
 		try:
 			int_year = int(year)
@@ -570,43 +496,9 @@ class Ripper(rox.Window):
 					artist, track, album, genre, tracknum+1, int_year)
 		ogg_args = '"%s"' % (strip_illegal(track)+'.wav')
 
-		#print ogg_opts, ogg_tags, ogg_args
-
+		#dbg(ogg_opts, ogg_tags, ogg_args)
 		thing = popen2.Popen4(ogg_cmd+' '+ogg_opts+' '+ogg_tags+' '+ogg_args )
-		outfile = thing.fromchild
-
-		while True:
-			line = myreadline(outfile)
-			if line:
-				#print line
-				#for some reason getting this right for ogg was a royal pain.
-				x = re.match('^.*\[[\s]*([.0-9]+)%\]', line)
-				if x:
-					percent = float(x.group(1))
-					self.status_update(tracknum, 'enc', percent)
-			else:
-				break
-			if self.stop_request:
-				break
-
-		if self.stop_request:
-			os.kill(thing.pid, signal.SIGKILL)
-		elif HAVE_XATTR:
-			try:
-				filename = strip_illegal(track)+'.ogg'
-				xattr.setxattr(filename, 'user.Title', track)
-				xattr.setxattr(filename, 'user.Artist', artist)
-				xattr.setxattr(filename, 'user.Album', album)
-				xattr.setxattr(filename, 'user.Genre', genre)
-				xattr.setxattr(filename, 'user.Track', '%d' % tracknum)
-				xattr.setxattr(filename, 'user.Year', year)
-			except:
-				pass
-
-		code = thing.wait()
-		self.status_update(tracknum, 'enc', 100)
-		#print code
-		return code
+		return thing
 
 
 	def rip_n_encode(self, button=None):
@@ -635,28 +527,48 @@ class Ripper(rox.Window):
 		#the queue to feed tracks from ripper to encoder
 		self.wavqueue = Queue.Queue(1000)
 
-		self.ripper_thd = self.runit(self.ripit)
-		self.encoder_thd = self.runit(self.encodeit)
+		tasks.Task(self.ripit())
+		tasks.Task(self.encodeit())
 
 
 	def ripit(self):
 		'''Thread to rip all selected tracks'''
 		self.is_ripping = True
-		for i in range(self.count):
+		for tracknum in range(self.count):
 			if self.stop_request:
 				break;
 
-			if self.store[i][COL_ENABLE]:
-				track = self.store[i][COL_TRACK]
-				#print i, track
-				status = self.get_cdda2wav(i, track)
+			if self.store[tracknum][COL_ENABLE]:
+				track = self.store[tracknum][COL_TRACK]
+				thing = self.run_cdda2wav(tracknum, track)
+				outfile = thing.fromchild
+				while True:
+					blocker = tasks.InputBlocker(outfile)
+					yield blocker
+
+					if self.stop_request:
+						os.kill(thing.pid, signal.SIGKILL)
+						break
+
+					line = myreadline(outfile)
+					if line:
+						x = re.match(".*([ 0-9][0-9])%", line)
+						if x:
+							percent = int(x.group(1))
+							self.status_update(tracknum, 'rip', percent)
+					else:
+						break
+
+				status = thing.wait()
+				self.status_update(tracknum, 'rip', 100)
+
 				if status <> 0:
-					print 'cdda2wav died %d' % status
-					self.status_update(i, 'rip_error', 0)
+					#dbg('cdda2wav died %d' % status)
+					self.status_update(tracknum, 'rip_error', 0)
 				else:
 					#push this track on the queue for the encoder
 					if self.wavqueue:
-						self.wavqueue.put((track, i))
+						self.wavqueue.put((track, tracknum))
 
 		#push None object to tell encoder we're done
 		if self.wavqueue:
@@ -674,53 +586,79 @@ class Ripper(rox.Window):
 		while True:
 			if self.stop_request:
 				break
-			(track, tracknum) = self.wavqueue.get(True)
+
+			try:
+				(track, tracknum) = self.wavqueue.get(False)
+			except Queue.Empty:
+				yield tasks.TimeoutBlocker(1)
+				continue
+
 			if track == None:
 				break
 
 			if ENCODER.value == 'MP3':
-				status = self.get_lame(tracknum, track, self.artist, self.genre, self.album, self.year)
+				thing = self.run_lame(tracknum, track, self.artist, self.genre, self.album, self.year)
 			else:
-				status = self.get_ogg(tracknum, track, self.artist, self.genre, self.album, self.year)
+				thing = self.run_ogg(tracknum, track, self.artist, self.genre, self.album, self.year)
+
+			outfile = thing.fromchild
+			while True:
+				blocker = tasks.InputBlocker(outfile)
+				yield blocker
+
+				if self.stop_request:
+					os.kill(thing.pid, signal.SIGKILL)
+					break
+
+				line = myreadline(outfile)
+				#dbg(line)
+				if line:
+					if ENCODER.value == 'MP3':
+						x = re.match(r"^[\s]+([0-9]+)/([0-9]+)", line)
+						if x:
+							percent = int(100 * (float(x.group(1)) / float(x.group(2))))
+							self.status_update(tracknum, 'enc', percent)
+					else: #OGG
+						x = re.match('^.*\[[\s]*([.0-9]+)%\]', line)
+						if x:
+							percent = float(x.group(1))
+							self.status_update(tracknum, 'enc', percent)
+				else:
+					break
+
+			status = thing.wait()
+			self.status_update(tracknum, 'enc', 100)
 
 			if status <> 0:
-				print 'encoder died %d' % status
+				#dbg('encoder died %d' % status)
 				self.status_update(tracknum, 'enc_error', 0)
+
 			try: os.unlink(strip_illegal(track)+".wav")
 			except:	pass
 			try: os.unlink(strip_illegal(track)+".inf")
 			except:	pass
 
 		self.is_encoding = False
-		del self.wavqueue
 
 
 	def status_update(self, row, state, percent):
-		'''Callback from rip/encode threads to update display'''
-		gtk.threads_enter()
-
+		'''Callback from rip/encode tasks to update display'''
 		iter = self.store.get_iter((row,))
 		if not iter: return
-
 		if state == 'rip':
 			if percent < 100:
 				self.store.set_value(iter, COL_STATUS, _('Ripping')+': %d%%' % percent)
 			else:
 				self.store.set_value(iter, COL_STATUS, _('Ripping')+': '+_('done'))
-
 		if state == 'enc':
 			if percent < 100:
 				self.store.set_value(iter, COL_STATUS, _('Encoding')+': %d%%' % percent)
 			else:
 				self.store.set_value(iter, COL_STATUS, _('Encoding')+': '+_('done'))
-
 		if state == 'rip_error':
 			self.store.set_value(iter, COL_STATUS, _('Ripping')+': '+_('error'))
-
 		if state == 'enc_error':
 			self.store.set_value(iter, COL_STATUS, _('Encoding')+': '+_('error'))
-
-		gtk.threads_leave()
 
 
 	def activate(self, view, path, column):
@@ -729,17 +667,11 @@ class Ripper(rox.Window):
 		if iter:
 			track = model.get_value(iter, COL_TRACK)
 			dlg = gtk.Dialog(APP_NAME)
-#			dlg.set_position(gtk.WIN_POS_NONE)
 			dlg.set_default_size(350, 100)
-#			(a, b) = dlg.get_size()
-#			(x, y) = self.get_position()
-#			(dx, dy) = self.get_size()
-#			dlg.move(x+dx/2-a/2, y+dy/2-b/2)
 			dlg.show()
 
 			entry = gtk.Entry()
 			entry.set_text(track)
-#			dlg.set_position(gtk.WIN_POS_MOUSE)
 			entry.show()
 			entry.set_activates_default(True)
 			dlg.vbox.pack_start(entry)
@@ -751,7 +683,7 @@ class Ripper(rox.Window):
 
 			if response == gtk.RESPONSE_OK:
 				track = entry.get_text()
-				#print track
+				#dbg(track)
 				model.set_value(iter, COL_TRACK, track)
 				self.view.columns_autosize()
 
