@@ -1,6 +1,5 @@
 TODO items for Ripper
 
-* Support cdparanoia and other ripper/encoders.
 * Provide list of alternate CDDB query results to allow user to choose
 	(currently just picks one at random)
 * More options (e.g. where to put wav files, how to name dirs and mp3 files)

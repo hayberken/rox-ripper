@@ -1,0 +1,31 @@
+
+Rippers
+~~~~~~~
+Commands and parameters for supported ripper commands.
+
+cdda2wav:
+	cdda2wav -g -x -H -D/dev/cdrom -A/dev/cdrom -t $T "$F"
+
+	This is the fastest ripper on my system.  However it takes over the CPU
+	so much that I always run it with 'nice'.
+
+cdparanoia:
+	cdparanoia -e $T "$F"
+
+	The -e parameter is required to get progress reporting from cdparanoia
+	as this generates a lot of extra output, performance is a bit lower.
+
+
+Encoders 
+~~~~~~~~
+These examples also add tags to the file.  You could remove these parameters
+if you use a separate tagging application.
+
+lame:
+	lame --ta "$A" --tt "$S" --tl "$L" --tg "$G" --tn $T --ty $Y "$F.wav" "$F.mp3"
+
+oggenc:
+	oggenc -a "$A" -t "$S" -l "$L" -G "$G" -N $T -d $Y "$F.wav" -o "$F.oga"
+
+	Note: Recent mime-type database lists *.ogg as Video.  Set to *.oga for Audio.
+

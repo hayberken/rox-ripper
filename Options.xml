@@ -1,60 +1,41 @@
 <?xml version="1.0"?>
 <options>
-	<section title="Locations">
-		<entry name='library' label='Music'>
-		The (optional) default location of your music.
+<section title="Settings">
+	<frame label="Library">
+		<label>The location of your music and how you want it organized.</label>
+		<label>Use the following parameters: $T Track number, $A Artist, $S Song, $L Album.</label>
+		<entry name='library'>
 		</entry>
+	</frame>
+	<frame label="Misc">
 		<entry name='cddb_server' label='CDDB'>
 		The full url to reach freedb or equivalent.  By default this is 'http://freedb.freedb.org/~cddb/cddb.cgi', but there are mirrors. Leave blank to disable CDDB queries.
 		</entry>
-	</section>
-
-	<section title='Ripper'>
-		<entry name='ripper' label='Ripper'>
-The application used for ripping from CD.
-If this is not in your PATH you need to give the full path to the executable.
-To run at lower priority run with 'nice'. (e.g. 'nice cdda2wav')
-		</entry>
-		<entry name='ripper_dev' label='Device'>
-		Device name of cdrom.  For example: /dev/cdrom.
-		</entry>
-		<entry name='ripper_lun' label='LUN'>
-		SCSI-style device name.  For example: 0,0,1 or ATAPI:0,1,0.
-		</entry>
-		<entry name='ripper_opts' label='Options'>
-		Options for the encoder.  For example: quality, speed, etc.
+		<entry name='device' label='CD Device'>
+		The CD device (e.g. /dev/cdrom).  Needed at least for CDDB, even if your rip command below doesn't need it.
 		</entry>
 		<toggle name='eject_after_rip' label='Eject after Rip'>
 		Eject CD after ripping is complete (Encoding may still be running).
 		</toggle>
-
-	</section>
-
-	<section title='Encoder'>
-		<hbox>
-		<label>Encoder</label>
-		<spacer/>
-		<radio-group name='encoder'>
-			<radio label='mp3' value='MP3'/>
-			<radio label='ogg' value='OGG'/>
-		</radio-group>
-		</hbox>
-		<entry name='mp3_encoder' label='MP3 Encoder'>
-The application used for encoding to MP3.
-If this is not in your PATH you need to give the full path to the executable.
-To run at lower priority run with 'nice'. (e.g. 'nice lame')
+		<toggle name='keep_wav' label='Keep WAV Files'>
+		Do not delete the WAV files after Encoding.
+		</toggle>
+		<toggle name='rip_only' label='Rip Only'>
+		Do not Encode, only Rip to WAV files.
+		</toggle>
+	</frame>
+</section>
+<section title="Commands">
+	<frame label="Ripper">
+		<label>The command to Rip from CD to WAV files.</label>
+		<label>Use $D as the device, $T to represent the Track number and $F as the output Filename. To run at lower priority run with 'nice'.</label>
+		<entry name='ripper'>
 		</entry>
-		<entry name='mp3_encoder_opts' label='Options'>
-		Options for the encoder.  For example: vbr, id3 tags, min bitrate.
-		</entry>
-		<entry name='ogg_encoder' label='OGG Encoder'>
-The application used for encoding to OGG.
-If this is not in your PATH you need to give the full path to the executable.
-To run at lower priority run with 'nice'. (e.g. 'nice oggenc')
-		</entry>
-		<entry name='ogg_encoder_opts' label='Options'>
-		Options for the encoder.  For example: ???.
-		</entry>
-	</section>
-
+	</frame>
+	<frame label="Encoder">
+		<label>The command used for encoding from WAV to MP3, OGG, etc.</label>
+		<label>Use the following parameters: $T Track number, $F Filename, $A Artist, $S Song, $L Album, $G Genre, $Y Year.</label>
+		<entry name='encoder'/>
+	</frame>
+</section>
 </options>

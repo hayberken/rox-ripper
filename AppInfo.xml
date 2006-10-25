@@ -7,12 +7,12 @@
 			<Label xml:lang="de">Einstellungen...</Label>
 		</Item>
 	</AppMenu>
-	<Summary xml:lang="en">MP3/OGG CD Ripper</Summary>
-	<Summary xml:lang="it">MP3/OGG CD Ripper</Summary>
+	<Summary xml:lang="en">CD Ripper</Summary>
+	<Summary xml:lang="it">CD Ripper</Summary>
 	<About xml:lang="en">
-		<Purpose>MP3/OGG CD Ripper</Purpose>
+		<Purpose>CD Ripper</Purpose>
 		<Author>Ken Hayber</Author>
-		<Version>006 (13-Sep-2006)</Version>
+		<Version>007 (18-Oct-2006)</Version>
 		<License>GNU General Public License</License>
 		<Homepage>http://www.hayber.us/rox/Ripper</Homepage>
 	</About>
